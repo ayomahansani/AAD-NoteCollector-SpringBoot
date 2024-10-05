@@ -1,0 +1,5 @@
+#spring:
+#  application:
+#    name: notecollectorspringboot
+#server:
+#  port: 5050
