@@ -1,5 +1,6 @@
 package lk.ijse.notecollectorspringboot.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +12,13 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${secure.username}") // use value injection
+    private String username;
+    @Value("${secure.password}")
+    private String password;
+    @Value("${secure.role}")
+    private String role;
 
     @Bean
     SecurityFilterChain securityFilterChain (HttpSecurity http) throws Exception {
@@ -25,10 +33,12 @@ public class SecurityConfig {
     @Bean
     public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
         UserDetails principleUser = User.withDefaultPasswordEncoder()
-                .username("oshan")
-                .password("ayoma")
-                .roles("USER").build(); // user kenekva hada gannava
+                .username(username)
+                .password(password)
+                .roles(role).build(); // user kenekva hada gannava
         return new InMemoryUserDetailsManager(principleUser);
     }
 
 }
+
+// java and springboot use karala Basic Auth use karapu hati thama me class eken karanne
