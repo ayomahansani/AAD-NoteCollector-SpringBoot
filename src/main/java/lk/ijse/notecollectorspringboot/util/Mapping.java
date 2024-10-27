@@ -28,6 +28,7 @@ public class Mapping {
     public List<UserDTO> asUserDTOList(List<UserEntity> userEntities) {
         return modelMapper.map(userEntities, new TypeToken<List<UserDTO>>() {}.getType());
     }
+
     //for note mapping
     public NoteDTO toNoteDTO(NoteEntity noteEntity) {
         return modelMapper.map(noteEntity, NoteDTO.class);
