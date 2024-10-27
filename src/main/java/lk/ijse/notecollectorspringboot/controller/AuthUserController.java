@@ -34,45 +34,49 @@ public class AuthUserController {
             @RequestPart ("role") String role,
             @RequestPart ("profilePic") MultipartFile profilePic
     ) {
+
         // profilePic ----> Base64
         String base64ProPic = "";
+
         try {
+
             byte [] bytesProPic = profilePic.getBytes();
             base64ProPic = AppUtil.profilePicToBase64(bytesProPic);
+
             //UserId generate
             String userId = AppUtil.generateUserId();
+
             //Build the Object
             UserDTO buildUserDTO = new UserDTO();
             buildUserDTO.setUserId(userId);
             buildUserDTO.setFirstName(firstName);
             buildUserDTO.setLastName(lastName);
             buildUserDTO.setEmail(email);
-            //buildUserDTO.setPassword(password);
             buildUserDTO.setPassword(passwordEncoder.encode(password)); // Password encoding
             //security config eke bean ekak wdihata initialize krla dn mekta di krla thiyenne interbean dependeny eka bean ekak matha anith bean eka depend wenwa
             buildUserDTO.setRole(Role.valueOf(role));
-            //direct data base ekata ywan na auth service ekta ywanne
             buildUserDTO.setProfilePic(base64ProPic);
 
-            /*userService.saveUser(buildUserDTO);*/ //user service one na issrhta one auth service
+            /*userService.saveUser(buildUserDTO);*/ //user service one na. issarahata one auth service
             //authService.signUp(buildUserDTO);
             //change things with auth user service
 
+            //direct data base ekata yawan na. auth service ekta ywanne
             return ResponseEntity.ok(authService.signUp(buildUserDTO));
 
         }catch (DataPersistException e){
-            e.printStackTrace();
+            e.printStackTrace(); // Consider logging
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }catch (Exception e){
-            e.printStackTrace();
+            e.printStackTrace(); // Consider logging
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
 
-    @PostMapping(value = "signIn", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "signin", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JWTAuthResponse> signIn(@RequestBody SignIn signIn){
-        return ResponseEntity.ok(authService.signIn(signIn));
+        return ResponseEntity.ok(authService.signIn(signIn)); //user kenek hambenawa username(email),password thiyena. USER ewanne json ekakin
     }
 
 

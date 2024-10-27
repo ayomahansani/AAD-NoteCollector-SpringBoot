@@ -18,11 +18,12 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/notes")
 public class NoteController {
-    @Autowired
-   private NoteService noteService;
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Autowired
+    private NoteService noteService;
+
+    //save note
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveNote(@RequestBody NoteDTO noteDTO) {
         try {
             noteService.saveNote(noteDTO);
@@ -35,17 +36,23 @@ public class NoteController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    @GetMapping(value = "/{noteID}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public NoteStatus getSelectedNote(@PathVariable ("noteID") String noteId){
+
+    //get selected note
+    @GetMapping(value = "/{noteId}",produces = MediaType.APPLICATION_JSON_VALUE)
+    public NoteStatus getSelectedNote(@PathVariable ("noteId") String noteId){
             if (!RegexProcess.noteIdMatcher(noteId)) {
                 return new SelectedUserAndNoteErrorStatus(1,"Note ID is not valid");
             }
             return noteService.getNote(noteId);
     }
+
+    //get all notes
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<NoteDTO> getALlNotes(){
        return noteService.getAllNotes();
     }
+
+    //delete note
     @DeleteMapping(value = "/{noteId}")
     public ResponseEntity<Void> deleteNote(@PathVariable ("noteId") String noteId){
         try {
@@ -62,10 +69,10 @@ public class NoteController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    //update note
     @PutMapping(value = "/{noteId}")
-    public ResponseEntity<Void> updateNote(@PathVariable ("noteId") String noteId,
-                           @RequestBody NoteDTO updatedNoteDTO){
-        //validations
+    public ResponseEntity<Void> updateNote(@PathVariable ("noteId") String noteId, @RequestBody NoteDTO updatedNoteDTO){
         try {
             if(!RegexProcess.noteIdMatcher(noteId) || updatedNoteDTO == null){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -80,4 +87,5 @@ public class NoteController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

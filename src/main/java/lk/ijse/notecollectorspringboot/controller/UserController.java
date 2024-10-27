@@ -25,8 +25,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    //save user
+    /*PostMan Content Type - multipart/form-data; boundary=<calculated when request is sent> */
+    @PostMapping(value = "signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveUser(
            @RequestPart ("firstName") String firstName,
            @RequestPart ("lastName") String lastName,
@@ -34,13 +35,18 @@ public class UserController {
            @RequestPart ("password") String password,
            @RequestPart ("profilePic") MultipartFile profilePic
     ) {
+
          // profilePic ----> Base64
         String base64ProPic = "";
+
         try {
+
             byte [] bytesProPic = profilePic.getBytes();
             base64ProPic = AppUtil.profilePicToBase64(bytesProPic);
+
             //UserId generate
             String userId = AppUtil.generateUserId();
+
             //Build the Object
             UserDTO buildUserDTO = new UserDTO();
             buildUserDTO.setUserId(userId);
@@ -49,6 +55,7 @@ public class UserController {
             buildUserDTO.setEmail(email);
             buildUserDTO.setPassword(password);
             buildUserDTO.setProfilePic(base64ProPic);
+
             userService.saveUser(buildUserDTO);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }catch (DataPersistException e){
@@ -60,6 +67,7 @@ public class UserController {
         }
     }
 
+    //get selected user
     @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UserStatus getSelectedUser(@PathVariable ("userId") String userId){
         if(!RegexProcess.userIdMatcher(userId)){
@@ -68,6 +76,14 @@ public class UserController {
         return userService.getUser(userId);
     }
 
+    //get all users who are admin
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserDTO> getAllUsers(){
+        return userService.getAllUsers();
+    }
+
+    //delete user
     @DeleteMapping(value = "/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable("userId") String userId){
         try {
@@ -85,12 +101,7 @@ public class UserController {
         }
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<UserDTO> getAllUsers(){
-       return userService.getAllUsers();
-    }
-
+    //update user
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void updateUser(
