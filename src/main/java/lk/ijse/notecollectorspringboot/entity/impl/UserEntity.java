@@ -6,6 +6,7 @@ import lk.ijse.notecollectorspringboot.entity.SuperEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,9 +19,12 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@ToString
 @Entity
 @Table(name = "user")
 public class UserEntity implements SuperEntity, UserDetails {
+    /*This class represents a user entity in your database and implements UserDetails,
+     which is required for Spring Security to handle user authentication and authorization.*/
     @Id
     private String userId;
     private String firstName;

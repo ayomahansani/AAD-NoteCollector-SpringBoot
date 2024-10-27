@@ -5,10 +5,12 @@ import lk.ijse.notecollectorspringboot.entity.SuperEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@ToString
 @Entity
 @Table(name = "note")
 public class NoteEntity implements SuperEntity {
