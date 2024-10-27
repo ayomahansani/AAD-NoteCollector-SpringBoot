@@ -13,4 +13,6 @@ public interface UserService {
     void deleteUser(String userId);
     void updateUser(String userId, UserDTO userDTO);
     UserDetailsService userDetailsService();
+    /*The userDetailsService() method returns a UserDetailsService implementation,
+     which retrieves user data based on the username (email in this case).*/
 }

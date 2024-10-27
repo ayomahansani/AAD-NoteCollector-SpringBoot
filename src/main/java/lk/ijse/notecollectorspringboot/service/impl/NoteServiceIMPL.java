@@ -20,16 +20,17 @@ import java.util.Optional;
 @Service
 @Transactional
 public class NoteServiceIMPL implements NoteService {
+
    @Autowired
    private NoteDao noteDao;
+
    @Autowired
    private Mapping noteMapping;
 
     @Override
     public void saveNote(NoteDTO noteDTO) {
         noteDTO.setNoteId(AppUtil.generateNoteId());
-        NoteEntity savedNote =
-                noteDao.save(noteMapping.toNoteEntity(noteDTO));
+        NoteEntity savedNote = noteDao.save(noteMapping.toNoteEntity(noteDTO));
         if(savedNote == null){
             throw new DataPersistException("Note not saved");
         }

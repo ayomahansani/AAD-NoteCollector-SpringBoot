@@ -20,18 +20,21 @@ import java.util.Optional;
 @Service
 @Transactional
 public class UserServiceIMPL implements UserService {
+
     @Autowired
     private UserDao userDao;
+
     @Autowired
     private Mapping mapping;
+
     @Override
     public void saveUser(UserDTO userDTO) {
-        UserEntity savedUser =
-                userDao.save(mapping.toUserEntity(userDTO));
+        UserEntity savedUser = userDao.save(mapping.toUserEntity(userDTO));
         if (savedUser == null) {
             throw new DataPersistException("User not saved");
         }
     }
+
     @Override
     public List<UserDTO> getAllUsers() {
         List<UserEntity> allUsers = userDao.findAll();

@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lk.ijse.notecollectorspringboot.service.JWTService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.function.Function;
 
 
 @Service
+@RequiredArgsConstructor
 public class JWTServiceIMPL implements JWTService {
 
     @Value("${spring.jwtKey}")
@@ -38,51 +40,63 @@ public class JWTServiceIMPL implements JWTService {
         return refreshToken(new HashMap<>(),userDetails);
     }
 
-    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = getClaims(token);
-        return claimsResolver.apply(claims);
+    @Override
+    public boolean validateToken(String token, UserDetails userDetails) {
+        var username = extractUserName(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+
     }
 
-    private Claims getClaims(String token) {
-        return Jwts.parser().setSigningKey(getSignKey()).build().parseClaimsJwt(token).getBody();
+    // actual process
+    private <T> T extractClaim(String token, Function<Claims,T> claimResolve) {
+        final Claims claims = getAllClaims(token);
+        return claimResolve.apply(claims);
     }
 
-    private Key getSignKey() {
-        byte [] decodedJWT = Decoders.BASE64.decode(jwtKey);
-        return Keys.hmacShaKeyFor(decodedJWT);
-    }
+    private String generateToken(Map<String,Object> extractClaims, UserDetails userDetails){
 
-    private String genToken(Map<String, Object> genClaims, UserDetails userDetails) {
-        genClaims.put("role",userDetails.getAuthorities());
+        extractClaims.put("role",userDetails.getAuthorities());
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + 1000 * 600); // 10 mins
+        Date expire = new Date(now.getTime() + 1000 * 600 *600);
 
-        return Jwts.builder()
-                .setClaims(genClaims)
+        return Jwts.builder().setClaims(extractClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(now)
-                .setExpiration(expiration)
+                .setExpiration(expire)
+                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+
+    }
+
+    private String refreshToken(Map<String,Object> extractClaims,UserDetails userDetails){
+
+        extractClaims.put("role",userDetails.getAuthorities());
+        Date now = new Date();
+        Date expire = new Date(now.getTime() + 1000 * 600);
+        Date refreshExpire = new Date(now.getTime() + 1000 * 600 * 600);
+
+        return Jwts.builder().setClaims(extractClaims)
+                .setSubject(userDetails.getUsername())
+                .setExpiration(refreshExpire)
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
     private boolean isTokenExpired(String token) {
-        return getExpiration(token).before(new Date());
+        return extractExpiration(token).before(new Date());
     }
 
-    private Date getExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    private Date extractExpiration(String token) {
+        return extractClaim(token,Claims::getExpiration);
     }
 
-    private String refreshToken(Map<String, Object> genClaimsRefresh, UserDetails userDetails) {
-        genClaimsRefresh.put("role",userDetails.getAuthorities());
-        Date now = new Date();
-        Date refreshExpire = new Date(now.getTime() + 1000 * 600 * 600);
+    private Claims getAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(getSignKey()).build().parseClaimsJws(token)
+                .getBody();
+    }
 
-        return Jwts.builder()
-                .setClaims(genClaimsRefresh)
-                .setSubject(userDetails.getUsername())
-                .setExpiration(refreshExpire)
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+    private Key getSignKey(){
+        byte[] decode = Decoders.BASE64.decode(jwtKey);
+        return Keys.hmacShaKeyFor(decode);
     }
 
 }
