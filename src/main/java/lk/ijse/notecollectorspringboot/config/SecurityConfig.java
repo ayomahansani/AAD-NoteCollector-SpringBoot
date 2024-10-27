@@ -15,12 +15,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor // meka dan nathanm "private final UserService userService;" meke final ain karala @Autowired danna one
 public class SecurityConfig {
 
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
+
+    private final JWTConfigFilter jwtConfigFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -29,13 +33,12 @@ public class SecurityConfig {
                         req.requestMatchers("api/v1/auth/**")
                                 .permitAll() // auth url pattern eken ena okkoma permit karanava
                                 .anyRequest() // ehema nathi requests authenticate karanna
-                                .authenticated()
-                ) // ena request authorize karanna
+                                .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(); // securityFilterChain ekata issarahin thava filter ekak danava
-        return http.build();
+                .addFilterBefore(jwtConfigFilter, UsernamePasswordAuthenticationFilter.class); // securityFilterChain ekata issarahin thava filter ekak danava
 
+        return http.build();
     }
 
     @Bean
@@ -50,6 +53,9 @@ public class SecurityConfig {
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         return daoAuthenticationProvider;
     }
+     /*This part is intended to configure an AuthenticationProvider, specifically a DaoAuthenticationProvider, which uses a UserDetailsService to retrieve user details for authentication.
+    You need to set the UserDetailsService (likely from your UserService) for the DaoAuthenticationProvider to function correctly.*/
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {

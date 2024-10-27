@@ -1,14 +1,18 @@
 package lk.ijse.notecollectorspringboot.dto.impl;
 
 import lk.ijse.notecollectorspringboot.dto.UserStatus;
+import lk.ijse.notecollectorspringboot.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@ToString
 public class UserDTO implements UserStatus {
     private String userId;
     private String firstName;
@@ -16,5 +20,6 @@ public class UserDTO implements UserStatus {
     private String email;
     private String password;
     private String profilePic;
+    private Role role;
     private List<NoteDTO> notes;
 }
