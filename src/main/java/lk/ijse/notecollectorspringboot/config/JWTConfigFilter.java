@@ -7,12 +7,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lk.ijse.notecollectorspringboot.service.JWTService;
 import lk.ijse.notecollectorspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class JWTConfigFilter extends OncePerRequestFilter {
         userEmail = jwtService.extractUserName(extractedJwtToken);
 
         // user email check
-        if(StringUtils.isNotEmpty(userEmail) && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if(!StringUtils.isEmpty(userEmail) && SecurityContextHolder.getContext().getAuthentication() == null) {
             var userDetails = userService.userDetailsService().loadUserByUsername(userEmail);
             if(jwtService.validateToken(extractedJwtToken, userDetails)) {
                 //add user to the security context
